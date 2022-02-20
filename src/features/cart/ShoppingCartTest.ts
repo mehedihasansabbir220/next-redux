@@ -146,4 +146,14 @@ const singlePrice=(item:Item):number=>{
 console.log("Single Card Price ",singlePrice);
 
 
+//Get Total Price
+
+const totalPrice=(store:Array<Item>):number=>{
+    const grandTotal=store.reduce((total,item)=>total + item.quantity*item.unitPrice,0);
+    return grandTotal;
+}
+
+console.log("Grand Total ",totalPrice);
+
+
 
