@@ -153,7 +153,22 @@ const totalPrice=(store:Array<Item>):number=>{
     return grandTotal;
 }
 
-console.log("Grand Total ",totalPrice);
+console.log("Grand Total ",totalPrice(storeItem));
 
+
+//Show all Item In Cart 
+
+const showAllItems=(cart:Array<Item>):void=>{
+    const allItems=cart.filter((product)=>product.quantity>1)
+    if(allItems){
+        console.log("all Item ")
+    }
+    else{
+        console.log("There are noew order in your card ")
+    }
+}
+
+
+console.log("All Item Here ",showAllItems(storeItem));
 
 
