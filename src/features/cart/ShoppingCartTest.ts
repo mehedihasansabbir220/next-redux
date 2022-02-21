@@ -4,171 +4,176 @@ interface Item{
     title:string,
     unitPrice:number,
     quantity:number,
-    discount:boolean
+    discount:string[]
 };
 
 
 interface DiscountCode{
     code:string,
+    type: "cart" | "item",
     value:number,
-    applied:string
+    itemId?: number;
 
 };
+interface Cart{
+    items:Item[],
+    discount:string[]
+}
 
-const discountCode:Array<DiscountCode>=[
+const discountCodes:Array<DiscountCode>=[
     {
         code:'NewYear2022',
+        type:"cart",
         value:20,
-        applied:'all'
     },
     {
         code:'summer2022',
+        type:"cart",
         value:10,
-        applied:'Mens-Plo T-shirt'
     },
     {
         code:'fullFree',
-        value:100,
-        applied:"Womens-Plo T-shirt"
+        type:"item",
+        value:70,
+        itemId:2
+        
     }
 
 ]
-const item:Item={
-    id:1,
-    title:'Mens TShirt',
-    unitPrice:35.99,
-    quantity:1,
-    discount:false
+const cart:Cart={
+    items:[],
+    discount:[]
 }
-
-let storeItem:Array<Item>=[];
 
 //Add to Product Card 
 const addToCart=(item:Item):void=>{
-    const product=storeItem.find((product)=>product.id==item.id);
-    if(product){
+    const isItem=cart.items.find((product)=>product.id===item.id)
+    if(isItem){
         item.quantity++
-        console.log(" item already exists",product);
+    }else{
+        cart.items.push(item)
+        console.log("New Item Add" ,cart.items.find((product)=>product.id==item.id),)
+    }
+};
+const removeToCart=(id:number):void=>{
+    const isItem=cart.items.find((product)=>product.id==id && product.quantity>=1)
+    if(isItem.quantity>1){
+        isItem.quantity--,
+        console.log("One Item Remove ",isItem)
+
+    }
+    else if(isItem.quantity=1){
+        cart.items.filter((item)=>item.id !==isItem.id)
+        console.log("No Item From this Cart")
+
     }
     else{
-        storeItem.push(item);
-        console.log("New Product add",storeItem.find((product)=>product.id==item.id));
+        console.log("No item form this Cart",id)
     }
-};
-addToCart({
-    id:1,
-    title:'Womens T-shirt',
-    unitPrice:39.99,
-    quantity:1,
-    discount:false
-});
-addToCart({
-    id:2,
-    title:'Mens T-shirt',
-    unitPrice:35.99,
-    quantity:1,
-    discount:false
-});
-addToCart({
-    id:3,
-    title:'Mens-Plo T-shirt',
-    unitPrice:20.99,
-    quantity:1,
-    discount:false
-});
-addToCart({
-    id:4,
-    title:'Womens-Plo T-shirt',
-    unitPrice:39.99,
-    quantity:1,
-    discount:false
-});
-//Add an Item form card 
-
-const increaseItem=(id:number):void=>{
-    const increaseQuantity=storeItem.find((item)=>item.id==id)
-    if(increaseQuantity){
-        increaseQuantity.quantity++;
-        console.log("Increse Quantity For this product ",increaseQuantity)
-    }
-};
-
-increaseItem(1);
-//An item remove from Card 
-
-const removeACartItem=(id:number):void=>{
-    const decreaseQuantity=storeItem.find((item)=>item.id==id)
-    if(decreaseQuantity){
-        if(decreaseQuantity.quantity>1){
-            decreaseQuantity.quantity--;
-        }
-        console.log("Quainty decrease",decreaseQuantity)
-    }
-};
-removeACartItem(1);
-
-//DisCount Code 
-const codeApply=(code:string):void=>{
-    const discount=discountCode.find((item)=>item.code==code);
-    if(discount){
-        if(discount.applied='all'){
-            const price=storeItem.reduce((total,item)=>total+item.unitPrice*item.quantity,0)
-            console.log(discount.code,price);
-            const newPrice=(price*discount.value)/100;
-            console.log("New Price ",newPrice)
+}
+const addDiscountCode=(discountCode:string):void=>{
+    //Find the Code 
+    const checkCode=discountCodes.find((item)=>item.code==discountCode)
+    if(checkCode){
+        if(checkCode.type="cart"){
+            //all Ready Use this Code Or not 
+            const isApplied=cart.discount.includes(checkCode.code)
+            if(!isApplied){
+                cart.discount.push(checkCode.code)
+            }
+            else{
+                console.log("This Code allready Exits in the Cart",isApplied)
+                return
+            }
         }
         else{
-            const item=storeItem[
-                storeItem.findIndex((item)=>item.title==discount.applied)
-            ]
-            item.unitPrice=(item.unitPrice*discount.value)/100;
-            console.log("New Price ",item.unitPrice)
-            item.discount=true
+            const product=cart.items[cart.items.findIndex((item)=>item.id==checkCode.itemId)]
+            //All ready Use or not
+            const isApplid=product.discount.includes(checkCode.code)
+            if(!isApplid){
+                product.discount.push(checkCode.code)
+                console.log("Descount Code is item",product)
+
+            }else{
+                console.log("All Ready Use this code before")
+                return
+            }
+
         }
-        
-        // console.log(discount.code,)
 
     }
     else{
-        console.log("Enter Worng Discount Code ")
+        console.log("There Is No Code Here ",discountCode)
     }
+
 }
-codeApply('summer2022');
-
-
-//Get a total price of a single item 
-
+//Get Single Card Price 
 const singlePrice=(item:Item):number=>{
-    const totalPrice=item.unitPrice*item.quantity;
+    const codeApplied = item.discount.length > 0;
+    let totalPrice=0;
+    if(codeApplied){
+        const codeValue=discountCodes.filter((code)=>item.discount.includes(code.code))
+        console.log(codeValue)
+        const totalDiscount=codeValue.reduce((total,item)=>total+item.value,0)
+        console.log("Total Discount",totalDiscount)
+       totalPrice=(item.unitPrice*item.quantity)-((item.unitPrice*item.quantity*totalDiscount)/100);
+
+    }else{
+        totalPrice = item.quantity * item.unitPrice;
+
+    }
     return totalPrice;
 }
+const grandTotal=():number=>{
+  // check if any item has discounted price 
+  const haveDiscount = cart.items.filter(item => item.discount.length > 0);
+  let totalDiscountedItemPrice : number = 0;
+  if(haveDiscount){
+    const discountedItemPrice : number[] = [];
+    // get discounted price of these items 
+    haveDiscount.forEach(item => {
+     const price =  singlePrice(item);
+     discountedItemPrice.push(price)
+    })
+    totalDiscountedItemPrice = discountedItemPrice.reduce((total, item) => total + item, 0)
+  }
+  const codeApplied = cart.discount.length > 0;
+  let totalPrice = 0;
+  if (codeApplied) {
+    const codeValue = discountCodes.filter((code) =>
+      cart.discount.includes(code.code)
+    );
+    const totalDiscount = codeValue.reduce(
+      (total, item) => total + item.value,
+      0
+    );
+    const cartPrice = cart.items.reduce((total, item) => {
+      if(item.discount.length === 0){
+        return total + item.quantity * item.unitPrice
+      } else {
+        return total
+      }
+    }, 0);
+    const finalPrice = cartPrice + totalDiscountedItemPrice;
 
-console.log("Single Card Price ",singlePrice);
-
-
-//Get Total Price
-
-const totalPrice=(store:Array<Item>):number=>{
-    const grandTotal=store.reduce((total,item)=>total + item.quantity*item.unitPrice,0);
-    return grandTotal;
+    totalPrice = finalPrice - (finalPrice * totalDiscount / 100);
+  } else {
+    const cartPrice = cart.items.reduce((total, item) => {
+      if(item.discount.length === 0){
+        return total + item.quantity * item.unitPrice
+      } else {
+        return total
+      }
+    }, 0);
+    totalPrice = cartPrice + totalDiscountedItemPrice;
+    
+  }
+  return totalPrice;
 }
+// show all cart items
 
-console.log("Grand Total ",totalPrice(storeItem));
+const getCartItems = (): Item[] => {
+    return cart.items.filter((product) => product.quantity >= 1);
+  };
 
-
-//Show all Item In Cart 
-
-const showAllItems=(cart:Array<Item>):void=>{
-    const allItems=cart.filter((product)=>product.quantity>1)
-    if(allItems){
-        console.log("all Item ")
-    }
-    else{
-        console.log("There are noew order in your card ")
-    }
-}
-
-
-console.log("All Item Here ",showAllItems(storeItem));
-
-
+export{addToCart,removeToCart,addDiscountCode,getCartItems,grandTotal,singlePrice,cart,discountCodes}
