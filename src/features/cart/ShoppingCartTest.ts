@@ -34,7 +34,7 @@ const discountCodes:Array<DiscountCode>=[
     {
         code:'fullFree',
         type:"item",
-        value:70,
+        value:100,
         itemId:2
         
     }
