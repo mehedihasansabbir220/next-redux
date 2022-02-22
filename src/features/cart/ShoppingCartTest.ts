@@ -2,7 +2,7 @@ export {}
 interface Item{
     id:number,
     title:string,
-    unitPrice:number,
+    price:number,
     quantity:number,
     discount:string[]
 };
@@ -20,7 +20,7 @@ interface Cart{
     discount:string[]
 }
 
-const discountCodes:Array<DiscountCode>=[
+export const discountCodes:Array<DiscountCode>=[
     {
         code:'NewYear2022',
         type:"cart",
@@ -34,28 +34,29 @@ const discountCodes:Array<DiscountCode>=[
     {
         code:'fullFree',
         type:"item",
-        value:100,
+        value:25,
         itemId:2
         
     }
 
 ]
-const cart:Cart={
+export const cart:Cart={
     items:[],
     discount:[]
 }
 
 //Add to Product Card 
-const addToCart=(item:Item):void=>{
+export const addToCart=(item:Item):void=>{
     const isItem=cart.items.find((product)=>product.id===item.id)
     if(isItem){
-        item.quantity++
+        isItem.quantity++;
+        // item.quantity++
     }else{
         cart.items.push(item)
         console.log("New Item Add" ,cart.items.find((product)=>product.id==item.id),)
     }
 };
-const removeToCart=(id:number):void=>{
+export const removeToCart=(id:number):void=>{
     const isItem=cart.items.find((product)=>product.id==id && product.quantity>=1)
     if(isItem.quantity>1){
         isItem.quantity--,
@@ -63,7 +64,8 @@ const removeToCart=(id:number):void=>{
 
     }
     else if(isItem.quantity=1){
-        cart.items.filter((item)=>item.id !==isItem.id)
+        cart.items=cart.items.filter((item)=>item.id!==isItem.id)
+        // cart.items.filter((item)=>item.id !==isItem.id)
         console.log("No Item From this Cart")
 
     }
@@ -71,7 +73,7 @@ const removeToCart=(id:number):void=>{
         console.log("No item form this Cart",id)
     }
 }
-const addDiscountCode=(discountCode:string):void=>{
+export const addDiscountCode=(discountCode:string):void=>{
     //Find the Code 
     const checkCode=discountCodes.find((item)=>item.code==discountCode)
     if(checkCode){
@@ -108,23 +110,27 @@ const addDiscountCode=(discountCode:string):void=>{
 
 }
 //Get Single Card Price 
-const singlePrice=(item:Item):number=>{
+export const singlePrice=(item:Item):number=>{
     const codeApplied = item.discount.length > 0;
-    let totalPrice=0;
-    if(codeApplied){
-        const codeValue=discountCodes.filter((code)=>item.discount.includes(code.code))
-        console.log(codeValue)
-        const totalDiscount=codeValue.reduce((total,item)=>total+item.value,0)
-        console.log("Total Discount",totalDiscount)
-       totalPrice=(item.unitPrice*item.quantity)-((item.unitPrice*item.quantity*totalDiscount)/100);
-
-    }else{
-        totalPrice = item.quantity * item.unitPrice;
-
-    }
-    return totalPrice;
+  let totalPrice = 0;
+  if (codeApplied) {
+    // get code and then its value from discountCodes
+    const codeValue = discountCodes.filter((code) =>
+      item.discount.includes(code.code)
+    );
+    console.log(codeValue);
+    const totalDiscount = codeValue.reduce(
+      (total, item) => total + item.value,
+      0
+    );
+    console.log(totalDiscount);
+    totalPrice =(item.price * item.quantity) - ((item.price * item.quantity * totalDiscount) / 100);
+  } else {
+    totalPrice = item.quantity * item.price;
+  }
+  return totalPrice;
 }
-const grandTotal=():number=>{
+export const grandTotal=():number=>{
   // check if any item has discounted price 
   const haveDiscount = cart.items.filter(item => item.discount.length > 0);
   let totalDiscountedItemPrice : number = 0;
@@ -149,7 +155,7 @@ const grandTotal=():number=>{
     );
     const cartPrice = cart.items.reduce((total, item) => {
       if(item.discount.length === 0){
-        return total + item.quantity * item.unitPrice
+        return total + item.quantity * item.price
       } else {
         return total
       }
@@ -160,7 +166,7 @@ const grandTotal=():number=>{
   } else {
     const cartPrice = cart.items.reduce((total, item) => {
       if(item.discount.length === 0){
-        return total + item.quantity * item.unitPrice
+        return total + item.quantity * item.price
       } else {
         return total
       }
@@ -172,8 +178,8 @@ const grandTotal=():number=>{
 }
 // show all cart items
 
-const getCartItems = (): Item[] => {
+export const getCartItems = (): Item[] => {
     return cart.items.filter((product) => product.quantity >= 1);
   };
 
-export{addToCart,removeToCart,addDiscountCode,getCartItems,grandTotal,singlePrice,cart,discountCodes}
+// export{addToCart,removeToCart,addDiscountCode,getCartItems,grandTotal,singlePrice,cart,discountCodes}
