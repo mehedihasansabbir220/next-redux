@@ -32,7 +32,7 @@ export const discountCodes:Array<DiscountCode>=[
         value:10,
     },
     {
-        code:'fullFree',
+        code:'winter2022',
         type:"item",
         value:25,
         itemId:2
