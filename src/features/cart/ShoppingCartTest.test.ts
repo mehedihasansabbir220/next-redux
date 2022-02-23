@@ -1,5 +1,5 @@
 export {}
-import{addDiscountCode, addToCart,cart, discountCodes, removeToCart} from './ShoppingCartTest'
+import{addDiscountCode, addToCart,cart, discountCodes, getCartItems, grandTotal, removeToCart, singlePrice} from './ShoppingCartTest'
 
 describe('cart',()=>{
     describe(`addItem`,()=>{
@@ -72,11 +72,65 @@ describe('cart',()=>{
 
             }
             cart.items.push(item3)
-            const code=discountCodes[2].code
+            const code='winter2022'
             //when
             addDiscountCode(code)
             //then
-            expect(cart.discount[1]).toContain('winter2022')
+            expect(cart.items.find((item) => item.id === 3).discount).toContain('winter2022')
+        })
+    });
+    describe('cartItem Price',()=>{
+        it('returns total price given item id with discount',()=>{
+            // given
+      cart.items.push({
+        id: 4,
+        title: "Item 4",
+        price: 120,
+        quantity: 5,
+        discount: ["winter2022"],
+      })
+            const id=cart.items[0];
+            //when
+            const price=singlePrice(id);
+            //then
+            expect(price).toEqual(5)
+            
+        })
+        it('returns total price given item id withOut discount',()=>{
+            // given
+            cart.items.push({
+                id: 4,
+                title: "Item 4",
+                quantity: 1,
+                price: 75,
+                discount: []
+            });
+            //given
+            const id=cart.items[2]
+            //when
+            const price=singlePrice(id);
+            //then
+            expect(price).toEqual(450);
+
+        })
+    });
+    describe('getTotalPrice',()=>{
+        it('returns cart price',()=>{
+            //Given
+            //when
+            const price=grandTotal();
+            //then
+            expect(price).toEqual(346.5);
+        })
+
+    });
+    describe('getCartItem',()=>{
+        it('returns all items in cart',()=>{
+            //Given
+            //when
+            const cartItems = getCartItems();
+             //then
+            expect(cartItems.length).toEqual(4)
         })
     })
 
